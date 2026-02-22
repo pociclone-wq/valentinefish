@@ -1,0 +1,294 @@
+-- [[ HEARTFELT ISLAND - VALENTINE EDITION FINAL FIX ]] --
+
+local CoreGui = game:GetService("CoreGui")
+local IsRunning = false 
+local ManualRunning = false
+local LoopRunning = false
+
+-- Net Objects
+local Net = game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net")
+local RF_Charge = Net:WaitForChild("RF/ChargeFishingRod")
+local RF_Start = Net:WaitForChild("RF/RequestFishingMinigameStarted")
+local RF_Catch = Net:WaitForChild("RF/CatchFishCompleted")
+
+-- Remote Baru (Logic Ultra Fast & Insane)
+local RE_LuwlA = Net:WaitForChild("RE/LuwlA[Ir:zvAAuDE7h@")
+local RF_Jlcu8 = Net:WaitForChild("RF/Jlcu8l lA=m@; D5")
+local RF_Yisx6 = Net:WaitForChild("RF/Yisx6zNI7Hl;B5\":Cp5:D>-B7tv7>")
+local RF_Jevf9 = Net:WaitForChild("RF/Jevf9MCv6ws?D::E:k")
+
+-- 1. SETUP UTAMA
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "HeartfeltValentineUI"
+ScreenGui.Parent = CoreGui
+ScreenGui.ResetOnSpawn = false
+
+-- 2. ICON (ASLI)
+local IconButton = Instance.new("TextButton")
+IconButton.Name = "HeartfeltIcon"
+IconButton.Parent = ScreenGui
+IconButton.BackgroundColor3 = Color3.fromRGB(255, 105, 180) 
+IconButton.Position = UDim2.new(0, 15, 0.5, -22)
+IconButton.Size = UDim2.new(0, 45, 0, 45)
+IconButton.Text = "♡"
+IconButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+IconButton.TextSize = 30
+IconButton.Active = true
+IconButton.Draggable = true
+local IconCorner = Instance.new("UICorner", IconButton)
+IconCorner.CornerRadius = UDim.new(0, 10)
+
+-- 3. MENU UTAMA (ASLI)
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "HeartfeltMain"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(255, 245, 248) 
+MainFrame.BackgroundTransparency = 0.2 
+MainFrame.Position = UDim2.new(0.5, -110, 0.5, -75)
+MainFrame.Size = UDim2.new(0, 220, 0, 200) 
+MainFrame.Visible = false 
+MainFrame.Active = true
+MainFrame.Draggable = true
+local MainCorner = Instance.new("UICorner", MainFrame)
+MainCorner.CornerRadius = UDim.new(0, 12)
+
+-- Header Menu (ASLI)
+local Header = Instance.new("Frame", MainFrame)
+Header.Size = UDim2.new(1, 0, 0, 35)
+Header.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
+local HeaderCorner = Instance.new("UICorner", Header)
+HeaderCorner.CornerRadius = UDim.new(0, 12)
+
+local Title = Instance.new("TextLabel", Header)
+Title.Size = UDim2.new(0.6, 0, 1, 0)
+Title.Position = UDim2.new(0.05, 0, 0, 0)
+Title.BackgroundTransparency = 1
+Title.Text = "Heartfelt Island ♡" 
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 15
+Title.Font = Enum.Font.GothamBold
+Title.TextXAlignment = Enum.TextXAlignment.Left
+
+-- 4. TOMBOL NAVIGASI
+local HideBtn = Instance.new("TextButton", Header)
+HideBtn.Position = UDim2.new(0.70, 0, 0.15, 0) 
+HideBtn.Size = UDim2.new(0, 25, 0, 25) 
+HideBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+HideBtn.BackgroundTransparency = 0.4
+HideBtn.Text = "-"
+HideBtn.TextColor3 = Color3.fromRGB(255, 105, 180)
+HideBtn.TextSize = 18
+HideBtn.Font = Enum.Font.GothamBold
+Instance.new("UICorner", HideBtn).CornerRadius = UDim.new(0, 6)
+
+local CloseBtn = Instance.new("TextButton", Header)
+CloseBtn.Position = UDim2.new(0.84, 0, 0.15, 0) 
+CloseBtn.Size = UDim2.new(0, 25, 0, 25) 
+CloseBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+CloseBtn.BackgroundTransparency = 0.4
+CloseBtn.Text = "X"
+CloseBtn.TextColor3 = Color3.fromRGB(255, 105, 180)
+CloseBtn.TextSize = 16
+CloseBtn.Font = Enum.Font.GothamBold
+Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(0, 6)
+
+-- STORE, SELL, CHARM
+local function createTp(txt, x, cf)
+    local b = Instance.new("TextButton", MainFrame)
+    b.Size = UDim2.new(0, 62, 0, 25)
+    b.Position = UDim2.new(0, x, 0, 42)
+    b.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
+    b.BackgroundTransparency = 0.4 
+    b.Text = txt
+    b.TextSize = 8
+    b.TextColor3 = Color3.new(1,1,1)
+    b.Font = Enum.Font.GothamBold
+    Instance.new("UICorner", b).CornerRadius = UDim.new(0, 6)
+    b.MouseButton1Click:Connect(function() game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = cf end)
+end
+
+createTp("STORE", 10, CFrame.new(993.4823, 9.96749592, 2710.92407))
+createTp("SELL FISH", 79, CFrame.new(992.893127, 10.2631702, 2728.34619))
+createTp("CHARM", 148, CFrame.new(1030.71704, 9.82005215, 2727.89575))
+
+-- INPUT
+local TimeInput = Instance.new("TextBox", MainFrame)
+TimeInput.Position = UDim2.new(0.1, 0, 0.38, 0)
+TimeInput.Size = UDim2.new(0.8, 0, 0, 25)
+TimeInput.Text = "10"
+TimeInput.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
+TimeInput.BackgroundTransparency = 0.6
+TimeInput.TextColor3 = Color3.new(1,1,1)
+Instance.new("UICorner", TimeInput)
+
+local TimerLabel = Instance.new("TextLabel", MainFrame)
+TimerLabel.Position = UDim2.new(0, 0, 0.52, 0)
+TimerLabel.Size = UDim2.new(1, 0, 0, 20)
+TimerLabel.BackgroundTransparency = 1
+TimerLabel.Text = "Waktu Mundur: --"
+TimerLabel.TextColor3 = Color3.fromRGB(255, 105, 180)
+
+-- [[ TOMBOL BAWAH - ALIGNMENT SESUAI INSTRUKSI ]] --
+local function styleBtn(b, fSize)
+    b.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
+    b.BackgroundTransparency = 0.4
+    b.TextColor3 = Color3.new(1,1,1)
+    b.TextSize = fSize
+    b.Font = Enum.Font.GothamBold
+    Instance.new("UICorner", b).CornerRadius = UDim.new(0, 6)
+end
+
+local ELE = Instance.new("TextButton", MainFrame)
+ELE.Size = UDim2.new(0.32, -4, 0, 28)
+ELE.Position = UDim2.new(0.1, 0, 0.65, 0)
+ELE.Text = "ELE"
+styleBtn(ELE, 12)
+
+local LOOP = Instance.new("TextButton", MainFrame)
+LOOP.Size = UDim2.new(0.16, -4, 0, 28)
+LOOP.Position = UDim2.new(0.42, 2, 0.65, 0)
+LOOP.Text = "LOOP"
+styleBtn(LOOP, 8)
+
+local DM = Instance.new("TextButton", MainFrame)
+DM.Size = UDim2.new(0.32, -4, 0, 28)
+DM.Position = UDim2.new(0.58, 4, 0.65, 0)
+DM.Text = "DM"
+styleBtn(DM, 12)
+
+local CountdownBtn = Instance.new("TextButton", MainFrame)
+CountdownBtn.Size = UDim2.new(0.8, 0, 0, 28)
+CountdownBtn.Position = UDim2.new(0.1, 0, 0.82, 0)
+CountdownBtn.Text = "COUNTDOWN"
+styleBtn(CountdownBtn, 14)
+
+-- [[ LOKASI & SISIPAN ]] --
+local sisipan = CFrame.new(1086.98901, 4.84564781, 2726.69482, -0.997619331, 4.00304501e-08, 0.0689617693, 3.45460514e-08, 1, -8.07206959e-08, -0.0689617693, -7.81461651e-08, -0.997619331)
+
+local locations = {
+    CFrame.new(1113.65564, 4.84564781, 2718.93018, 0.0215933733, -2.79604073e-08, -0.999766827, -9.91858592e-12, 1, -2.79671433e-08, 0.999766827, 6.13821216e-10, 0.0215933733),
+    CFrame.new(1045.53442, 3.76683998, 2754.80322, -0.435598582, 4.6406214e-08, -0.900141001, 1.00297271e-07, 1, 3.01826608e-09, 0.900141001, -8.89669352e-08, -0.435598582),
+    CFrame.new(1071.66589, 3.76721025, 2836.66919, 0.911403298, -1.4748982e-09, -0.411514282, 3.34915776e-11, 1, -3.5098997e-09, 0.411514282, 3.18515192e-09, 0.911403298),
+    CFrame.new(1137.2052, 3.76659632, 2843.51416, 0.958188057, -2.57422901e-08, 0.28613925, 3.15254156e-10, 1, 8.89085214e-08, -0.28613925, -8.51008792e-08, 0.958188057),
+    CFrame.new(1190.38501, 3.76681519, 2824.64673, 0.746655166, -3.11596189e-08, 0.66521126, 3.69326819e-10, 1, 4.6427143e-08, -0.66521126, -3.44193865e-08, 0.746655166),
+    CFrame.new(1180.90601, 3.76661992, 2623.98584, -0.952335536, 1.16204131e-08, 0.305052489, -1.37405295e-11, 1, -3.81360543e-08, -0.305052489, -3.63225112e-08, -0.952335536),
+    CFrame.new(1161.05579, 3.76771474, 2617.54785, -0.840296984, -3.37421433e-08, 0.542126358, 5.43390088e-09, 1, 7.06629208e-08, -0.542126358, 6.23237e-08, -0.840296984),
+    CFrame.new(1121.03577, 3.76694131, 2602.9624, -0.991936088, 1.26511956e-08, 0.126738936, -4.57607535e-10, 1, -1.03402421e-07, -0.126738936, -1.02626593e-07, -0.991936088),
+    CFrame.new(1061.49622, 3.76703, 2619.37988, -0.575153351, -1.02416067e-07, -0.818045616, -1.1418929e-10, 1, -1.25115747e-07, 0.818045616, -7.18673263e-08, -0.575153351),
+    CFrame.new(1044.2124, 3.76686502, 2649.927, -0.313242286, -1.44602268e-08, -0.949673235, -1.91886354e-10, 1, -1.5163236e-08, 0.949673235, -4.56753746e-09, -0.313242286),
+    CFrame.new(1044.55579, 3.76715541, 2686.73291, 0.345707595, -2.27373746e-08, -0.938342273, -2.17181467e-10, 1, -2.43114435e-08, 0.938342273, 8.60844107e-09, 0.345707595)
+}
+
+-- [[ LOGIKA ]] --
+
+local function resetAll()
+    IsRunning = false
+    ManualRunning = false
+    LoopRunning = false
+    TimerLabel.Text = "Waktu Mundur: --"
+    ELE.BackgroundTransparency = 0.4
+    DM.BackgroundTransparency = 0.4
+    LOOP.BackgroundTransparency = 0.4
+end
+
+IconButton.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
+HideBtn.MouseButton1Click:Connect(function() MainFrame.Visible = false end)
+CloseBtn.MouseButton1Click:Connect(function() resetAll() ScreenGui:Destroy() end)
+
+-- EMERGENCY RESET pada Countdown
+CountdownBtn.MouseButton1Click:Connect(resetAll)
+
+-- ELE (Ultra Fast: 0.7-0.9s)
+ELE.MouseButton1Click:Connect(function()
+    if IsRunning then resetAll() else
+        resetAll()
+        IsRunning = true
+        ELE.BackgroundTransparency = 0
+        task.spawn(function()
+            while IsRunning do
+                pcall(function()
+                    RE_LuwlA:FireServer(1)
+                    RF_Jlcu8:InvokeServer()
+                    task.wait(math.random(7, 9) / 10)
+                    RF_Yisx6:InvokeServer(10.766, 0.887, tick())
+                    task.wait(0.01) RF_Jevf9:InvokeServer()
+                    task.wait(0.01) RF_Jevf9:InvokeServer()
+                    task.wait(0.01) RF_Jevf9:InvokeServer()
+                end)
+                task.wait(0.1)
+            end
+        end)
+    end
+end)
+
+-- DM (Insane Speed: 0.2-0.5s)
+DM.MouseButton1Click:Connect(function()
+    if ManualRunning then resetAll() else
+        resetAll()
+        ManualRunning = true
+        DM.BackgroundTransparency = 0
+        task.spawn(function()
+            while ManualRunning do
+                pcall(function()
+                    RE_LuwlA:FireServer(1)
+                    RF_Jlcu8:InvokeServer()
+                    task.wait(math.random(2, 5) / 10)
+                    RF_Yisx6:InvokeServer(10.766, 0.887, tick())
+                    task.wait(0.01) RF_Jevf9:InvokeServer()
+                    task.wait(0.01) RF_Jevf9:InvokeServer()
+                    task.wait(0.01) RF_Jevf9:InvokeServer()
+                end)
+                task.wait(0.1)
+            end
+        end)
+    end
+end)
+
+-- LOOP (Teleport Logic dengan Sisipan)
+LOOP.MouseButton1Click:Connect(function()
+    if LoopRunning then resetAll() else
+        resetAll()
+        LoopRunning = true
+        LOOP.BackgroundTransparency = 0
+        task.spawn(function()
+            while LoopRunning do
+                for _, loc in ipairs(locations) do
+                    if not LoopRunning then break end
+                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = loc
+                    local waitTime = tonumber(TimeInput.Text) or 10
+                    for i = waitTime, 1, -1 do
+                        if not LoopRunning then break end
+                        TimerLabel.Text = "Jeda Lokasi: "..i.."s"
+                        task.wait(1)
+                    end
+                    if not LoopRunning then break end
+                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = sisipan
+                    for i = 3, 1, -1 do
+                        if not LoopRunning then break end
+                        TimerLabel.Text = "Sisipan: "..i.."s"
+                        task.wait(1)
+                    end
+                end
+            end
+        end)
+    end
+end)
+
+-- COUNTDOWN (Format Renggang)
+task.spawn(function()
+    while true do
+        local target = 1772038800 
+        local now = os.time()
+        local diff = target - now
+        if diff <= 0 then
+            CountdownBtn.Text = "H a p p y   b i r t h d a y   K a r i n"
+        else
+            local d = math.floor(diff / 86400)
+            local h = math.floor((diff % 86400) / 3600)
+            local m = math.floor((diff % 3600) / 60)
+            local s = diff % 60
+            CountdownBtn.Text = string.format("%d D   %02d : %02d : %02d", d, h, m, s)
+        end
+        task.wait(1)
+    end
+end)
