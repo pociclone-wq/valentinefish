@@ -277,7 +277,7 @@ end)
 -- COUNTDOWN (Format Renggang)
 task.spawn(function()
     while true do
-        local target = 1772038800 
+        local target = 1772154000 
         local now = os.time()
         local diff = target - now
         if diff <= 0 then
