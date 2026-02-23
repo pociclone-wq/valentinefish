@@ -277,11 +277,11 @@ end)
 -- COUNTDOWN (Format Renggang)
 task.spawn(function()
     while true do
-        local target = 1772154000 
+        local target = 1772125200 
         local now = os.time()
         local diff = target - now
         if diff <= 0 then
-            CountdownBtn.Text = "H a p p y   b i r t h d a y   K a r i n"
+            CountdownBtn.Text = "Happy Birthday Karin"
         else
             local d = math.floor(diff / 86400)
             local h = math.floor((diff % 86400) / 3600)
