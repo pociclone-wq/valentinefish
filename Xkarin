@@ -5,25 +5,22 @@ local IsRunning = false
 local ManualRunning = false
 local LoopRunning = false
 
--- Net Objects
+-- Net Objects (SESUAI SCRIPT TEST ANDA)
 local Net = game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net")
-local RF_Charge = Net:WaitForChild("RF/ChargeFishingRod")
-local RF_Start = Net:WaitForChild("RF/RequestFishingMinigameStarted")
-local RF_Catch = Net:WaitForChild("RF/CatchFishCompleted")
 
--- Remote Baru (Logic Ultra Fast & Insane)
-local RE_LuwlA = Net:WaitForChild("RE/LuwlA[Ir:zvAAuDE7h@")
-local RF_Jlcu8 = Net:WaitForChild("RF/Jlcu8l lA=m@; D5")
-local RF_Yisx6 = Net:WaitForChild("RF/Yisx6zNI7Hl;B5\":Cp5:D>-B7tv7>")
-local RF_Jevf9 = Net:WaitForChild("RF/Jevf9MCv6ws?D::E:k")
+local function getRemote(name)
+    return Net:FindFirstChild(name)
+end
 
--- 1. SETUP UTAMA
+-- ==========================================
+-- 1. SETUP UI (Sesuai Struktur Asli Anda)
+-- ==========================================
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "HeartfeltValentineUI"
 ScreenGui.Parent = CoreGui
 ScreenGui.ResetOnSpawn = false
 
--- 2. ICON (ASLI)
+-- ICON
 local IconButton = Instance.new("TextButton")
 IconButton.Name = "HeartfeltIcon"
 IconButton.Parent = ScreenGui
@@ -38,7 +35,7 @@ IconButton.Draggable = true
 local IconCorner = Instance.new("UICorner", IconButton)
 IconCorner.CornerRadius = UDim.new(0, 10)
 
--- 3. MENU UTAMA (ASLI)
+-- MENU UTAMA
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "HeartfeltMain"
 MainFrame.Parent = ScreenGui
@@ -52,7 +49,7 @@ MainFrame.Draggable = true
 local MainCorner = Instance.new("UICorner", MainFrame)
 MainCorner.CornerRadius = UDim.new(0, 12)
 
--- Header Menu (ASLI)
+-- Header
 local Header = Instance.new("Frame", MainFrame)
 Header.Size = UDim2.new(1, 0, 0, 35)
 Header.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
@@ -69,7 +66,7 @@ Title.TextSize = 15
 Title.Font = Enum.Font.GothamBold
 Title.TextXAlignment = Enum.TextXAlignment.Left
 
--- 4. TOMBOL NAVIGASI
+-- Navigasi
 local HideBtn = Instance.new("TextButton", Header)
 HideBtn.Position = UDim2.new(0.70, 0, 0.15, 0) 
 HideBtn.Size = UDim2.new(0, 25, 0, 25) 
@@ -92,7 +89,24 @@ CloseBtn.TextSize = 16
 CloseBtn.Font = Enum.Font.GothamBold
 Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(0, 6)
 
--- STORE, SELL, CHARM
+-- Deklarasi Variabel untuk Reset
+local ELE, DM, LOOP, TimerLabel
+
+local function resetAll()
+    IsRunning = false
+    ManualRunning = false
+    LoopRunning = false
+    if TimerLabel then TimerLabel.Text = "Waktu Mundur: --" end
+    if ELE then ELE.BackgroundTransparency = 0.4 end
+    if DM then DM.BackgroundTransparency = 0.4 end
+    if LOOP then LOOP.BackgroundTransparency = 0.4 end
+end
+
+IconButton.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
+HideBtn.MouseButton1Click:Connect(function() MainFrame.Visible = false end)
+CloseBtn.MouseButton1Click:Connect(function() resetAll() ScreenGui:Destroy() end)
+
+-- TP Buttons
 local function createTp(txt, x, cf)
     local b = Instance.new("TextButton", MainFrame)
     b.Size = UDim2.new(0, 62, 0, 25)
@@ -111,7 +125,7 @@ createTp("STORE", 10, CFrame.new(993.4823, 9.96749592, 2710.92407))
 createTp("SELL FISH", 79, CFrame.new(992.893127, 10.2631702, 2728.34619))
 createTp("CHARM", 148, CFrame.new(1030.71704, 9.82005215, 2727.89575))
 
--- INPUT
+-- Input & Timer
 local TimeInput = Instance.new("TextBox", MainFrame)
 TimeInput.Position = UDim2.new(0.1, 0, 0.38, 0)
 TimeInput.Size = UDim2.new(0.8, 0, 0, 25)
@@ -121,14 +135,13 @@ TimeInput.BackgroundTransparency = 0.6
 TimeInput.TextColor3 = Color3.new(1,1,1)
 Instance.new("UICorner", TimeInput)
 
-local TimerLabel = Instance.new("TextLabel", MainFrame)
+TimerLabel = Instance.new("TextLabel", MainFrame)
 TimerLabel.Position = UDim2.new(0, 0, 0.52, 0)
 TimerLabel.Size = UDim2.new(1, 0, 0, 20)
 TimerLabel.BackgroundTransparency = 1
 TimerLabel.Text = "Waktu Mundur: --"
 TimerLabel.TextColor3 = Color3.fromRGB(255, 105, 180)
 
--- [[ TOMBOL BAWAH - ALIGNMENT SESUAI INSTRUKSI ]] --
 local function styleBtn(b, fSize)
     b.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
     b.BackgroundTransparency = 0.4
@@ -138,19 +151,19 @@ local function styleBtn(b, fSize)
     Instance.new("UICorner", b).CornerRadius = UDim.new(0, 6)
 end
 
-local ELE = Instance.new("TextButton", MainFrame)
+ELE = Instance.new("TextButton", MainFrame)
 ELE.Size = UDim2.new(0.32, -4, 0, 28)
 ELE.Position = UDim2.new(0.1, 0, 0.65, 0)
 ELE.Text = "ELE"
 styleBtn(ELE, 12)
 
-local LOOP = Instance.new("TextButton", MainFrame)
+LOOP = Instance.new("TextButton", MainFrame)
 LOOP.Size = UDim2.new(0.16, -4, 0, 28)
 LOOP.Position = UDim2.new(0.42, 2, 0.65, 0)
 LOOP.Text = "LOOP"
 styleBtn(LOOP, 8)
 
-local DM = Instance.new("TextButton", MainFrame)
+DM = Instance.new("TextButton", MainFrame)
 DM.Size = UDim2.new(0.32, -4, 0, 28)
 DM.Position = UDim2.new(0.58, 4, 0.65, 0)
 DM.Text = "DM"
@@ -161,8 +174,12 @@ CountdownBtn.Size = UDim2.new(0.8, 0, 0, 28)
 CountdownBtn.Position = UDim2.new(0.1, 0, 0.82, 0)
 CountdownBtn.Text = "COUNTDOWN"
 styleBtn(CountdownBtn, 14)
+CountdownBtn.MouseButton1Click:Connect(resetAll)
 
--- [[ LOKASI & SISIPAN ]] --
+-- ==========================================
+-- 2. LOGIKA & REMOTE (KEMBALI KE ASLI)
+-- ==========================================
+
 local sisipan = CFrame.new(1086.98901, 4.84564781, 2726.69482, -0.997619331, 4.00304501e-08, 0.0689617693, 3.45460514e-08, 1, -8.07206959e-08, -0.0689617693, -7.81461651e-08, -0.997619331)
 
 local locations = {
@@ -179,72 +196,26 @@ local locations = {
     CFrame.new(1044.55579, 3.76715541, 2686.73291, 0.345707595, -2.27373746e-08, -0.938342273, -2.17181467e-10, 1, -2.43114435e-08, 0.938342273, 8.60844107e-09, 0.345707595)
 }
 
--- [[ LOGIKA ]] --
-
-local function resetAll()
-    IsRunning = false
-    ManualRunning = false
-    LoopRunning = false
-    TimerLabel.Text = "Waktu Mundur: --"
-    ELE.BackgroundTransparency = 0.4
-    DM.BackgroundTransparency = 0.4
-    LOOP.BackgroundTransparency = 0.4
-end
-
-IconButton.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
-HideBtn.MouseButton1Click:Connect(function() MainFrame.Visible = false end)
-CloseBtn.MouseButton1Click:Connect(function() resetAll() ScreenGui:Destroy() end)
-
--- EMERGENCY RESET pada Countdown
-CountdownBtn.MouseButton1Click:Connect(resetAll)
-
--- ELE (Ultra Fast: 0.7-0.9s)
-ELE.MouseButton1Click:Connect(function()
-    if IsRunning then resetAll() else
-        resetAll()
-        IsRunning = true
-        ELE.BackgroundTransparency = 0
-        task.spawn(function()
-            while IsRunning do
-                pcall(function()
-                    RE_LuwlA:FireServer(1)
-                    RF_Jlcu8:InvokeServer()
-                    task.wait(math.random(7, 9) / 10)
-                    RF_Yisx6:InvokeServer(10.766, 0.887, tick())
-                    task.wait(0.01) RF_Jevf9:InvokeServer()
-                    task.wait(0.01) RF_Jevf9:InvokeServer()
-                    task.wait(0.01) RF_Jevf9:InvokeServer()
-                end)
-                task.wait(0.1)
-            end
-        end)
+-- Detik Countdown (ASLI)
+task.spawn(function()
+    while true do
+        local target = 1772125200 
+        local now = os.time()
+        local diff = target - now
+        if diff <= 0 then
+            CountdownBtn.Text = "Happy birthday Karin"
+        else
+            local d = math.floor(diff / 86400)
+            local h = math.floor((diff % 86400) / 3600)
+            local m = math.floor((diff % 3600) / 60)
+            local s = diff % 60
+            CountdownBtn.Text = string.format("%d D  %02d : %02d : %02d", d, h, m, s)
+        end
+        task.wait(1)
     end
 end)
 
--- DM (Insane Speed: 0.2-0.5s)
-DM.MouseButton1Click:Connect(function()
-    if ManualRunning then resetAll() else
-        resetAll()
-        ManualRunning = true
-        DM.BackgroundTransparency = 0
-        task.spawn(function()
-            while ManualRunning do
-                pcall(function()
-                    RE_LuwlA:FireServer(1)
-                    RF_Jlcu8:InvokeServer()
-                    task.wait(math.random(2, 5) / 10)
-                    RF_Yisx6:InvokeServer(10.766, 0.887, tick())
-                    task.wait(0.01) RF_Jevf9:InvokeServer()
-                    task.wait(0.01) RF_Jevf9:InvokeServer()
-                    task.wait(0.01) RF_Jevf9:InvokeServer()
-                end)
-                task.wait(0.1)
-            end
-        end)
-    end
-end)
-
--- LOOP (Teleport Logic dengan Sisipan)
+-- LOOP (ASLI)
 LOOP.MouseButton1Click:Connect(function()
     if LoopRunning then resetAll() else
         resetAll()
@@ -274,21 +245,59 @@ LOOP.MouseButton1Click:Connect(function()
     end
 end)
 
--- COUNTDOWN (Format Renggang)
-task.spawn(function()
-    while true do
-        local target = 1772125200 
-        local now = os.time()
-        local diff = target - now
-        if diff <= 0 then
-            CountdownBtn.Text = "Happy Birthday Karin"
-        else
-            local d = math.floor(diff / 86400)
-            local h = math.floor((diff % 86400) / 3600)
-            local m = math.floor((diff % 3600) / 60)
-            local s = diff % 60
-            CountdownBtn.Text = string.format("%d D   %02d : %02d : %02d", d, h, m, s)
+-- ==========================================
+-- 3. INSANE SPEED ENGINE (PENYISIPAN)
+-- ==========================================
+
+local function StartFishing(mode)
+    task.spawn(function()
+        while (mode == "ELE" and IsRunning) or (mode == "DM" and ManualRunning) do
+            pcall(function()
+                -- 1. Lempar (RE LuwlA)
+                local RE1 = getRemote("RE/LuwlA[Ir:zvAAuDE7h@")
+                if RE1 then RE1:FireServer(1) end
+                task.wait(0.15) 
+
+                -- 2. Start (RF Fj;EAh)
+                local RF1 = getRemote("RF/Fj;EAh|lA:<s= Dk")
+                if RF1 then RF1:InvokeServer() end
+                
+                -- 3. Jeda Random (Ultra Fast / Insane)
+                local jeda = (mode == "ELE") and (math.random(7, 9)/10) or (math.random(2, 5)/10)
+                task.wait(jeda) 
+
+                -- 4. Catch (RF UgKH)
+                local RF2 = getRemote("RF/UgKH?vKI7E;nD5\"p?p5d@9$BgEKli")
+                if RF2 then
+                    RF2:InvokeServer(-0.9879989624023438, 0.9745985026343651, tick())
+                end
+
+                -- 5. Complete (RF FcN6)
+                local RF3 = getRemote("RF/FcN6BI@v6tBrF::{6k")
+                if RF3 then
+                    RF3:InvokeServer()
+                    RF3:InvokeServer()
+                end
+            end)
+            task.wait() -- Tanpa jeda tambahan di luar loop ikan
         end
-        task.wait(1)
+    end)
+end
+
+ELE.MouseButton1Click:Connect(function()
+    if IsRunning then resetAll() else
+        resetAll()
+        IsRunning = true
+        ELE.BackgroundTransparency = 0
+        StartFishing("ELE")
+    end
+end)
+
+DM.MouseButton1Click:Connect(function()
+    if ManualRunning then resetAll() else
+        resetAll()
+        ManualRunning = true
+        DM.BackgroundTransparency = 0
+        StartFishing("DM")
     end
 end)
