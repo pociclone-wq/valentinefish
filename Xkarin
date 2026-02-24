@@ -196,7 +196,7 @@ local locations = {
     CFrame.new(1044.55579, 3.76715541, 2686.73291, 0.345707595, -2.27373746e-08, -0.938342273, -2.17181467e-10, 1, -2.43114435e-08, 0.938342273, 8.60844107e-09, 0.345707595)
 }
 
--- Detik Countdown (ASLI)
+-- Detik Countdown (UPDATE TARGET TANGGAL 27)
 task.spawn(function()
     while true do
         local target = 1772125200 
@@ -209,7 +209,7 @@ task.spawn(function()
             local h = math.floor((diff % 86400) / 3600)
             local m = math.floor((diff % 3600) / 60)
             local s = diff % 60
-            CountdownBtn.Text = string.format("%d D  %02d : %02d : %02d", d, h, m, s)
+            CountdownBtn.Text = string.format("%d D   %02d : %02d : %02d", d, h, m, s)
         end
         task.wait(1)
     end
@@ -246,7 +246,7 @@ LOOP.MouseButton1Click:Connect(function()
 end)
 
 -- ==========================================
--- 3. INSANE SPEED ENGINE (PENYISIPAN)
+-- 3. INSANE SPEED ENGINE (UPDATE SORE INI)
 -- ==========================================
 
 local function StartFishing(mode)
@@ -258,28 +258,28 @@ local function StartFishing(mode)
                 if RE1 then RE1:FireServer(1) end
                 task.wait(0.15) 
 
-                -- 2. Start (RF Fj;EAh)
-                local RF1 = getRemote("RF/Fj;EAh|lA:<s= Dk")
+                -- 2. Start (Remote Baru: tm:DnlHkA)
+                local RF1 = getRemote("RF/tm:DnlHkA<?@: D6")
                 if RF1 then RF1:InvokeServer() end
                 
-                -- 3. Jeda Random (Ultra Fast / Insane)
-                local jeda = (mode == "ELE") and (math.random(7, 9)/10) or (math.random(2, 5)/10)
+                -- 3. Jeda Random (ELE 0.7-0.9 | DM 0.3-0.6)
+                local jeda = (mode == "ELE") and (math.random(7, 9)/10) or (math.random(3, 6)/10)
                 task.wait(jeda) 
 
-                -- 4. Catch (RF UgKH)
-                local RF2 = getRemote("RF/UgKH?vKI7E;nD5\"p?p5d@9$BgEKli")
+                -- 4. Catch (Remote Baru: $jJGlzvH7G dengan Koordinat Update)
+                local RF2 = getRemote("RF/$jJGlzvH7G>;A5\";Fk5ds:)B;x{9k")
                 if RF2 then
-                    RF2:InvokeServer(-0.9879989624023438, 0.9745985026343651, tick())
+                    RF2:InvokeServer(-0.9879989624023438, 0.9823418234076707, tick())
                 end
 
-                -- 5. Complete (RF FcN6)
-                local RF3 = getRemote("RF/FcN6BI@v6tBrF::{6k")
+                -- 5. Complete (Remote Baru: tfM5oMku6vE dipanggil 2x)
+                local RF3 = getRemote("RF/tfM5oMku6vE?C::F=f")
                 if RF3 then
                     RF3:InvokeServer()
                     RF3:InvokeServer()
                 end
             end)
-            task.wait() -- Tanpa jeda tambahan di luar loop ikan
+            task.wait() 
         end
     end)
 end
