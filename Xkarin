@@ -4,6 +4,7 @@ local CoreGui = game:GetService("CoreGui")
 local IsRunning = false 
 local ManualRunning = false
 local LoopRunning = false
+local AutoSellRunning = false
 
 -- Net Objects (SESUAI SCRIPT TEST ANDA)
 local Net = game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net")
@@ -96,6 +97,7 @@ local function resetAll()
     IsRunning = false
     ManualRunning = false
     LoopRunning = false
+    AutoSellRunning = false
     if TimerLabel then TimerLabel.Text = "Waktu Mundur: --" end
     if ELE then ELE.BackgroundTransparency = 0.4 end
     if DM then DM.BackgroundTransparency = 0.4 end
@@ -118,7 +120,36 @@ local function createTp(txt, x, cf)
     b.TextColor3 = Color3.new(1,1,1)
     b.Font = Enum.Font.GothamBold
     Instance.new("UICorner", b).CornerRadius = UDim.new(0, 6)
-    b.MouseButton1Click:Connect(function() game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = cf end)
+    
+    if txt == "SELL FISH" then
+        b.Text = "SELL ALL FISH"
+        b.MouseButton1Click:Connect(function()
+            if AutoSellRunning then
+                AutoSellRunning = false
+                b.BackgroundTransparency = 0.4
+                b.Text = "SELL ALL FISH"
+            else
+                AutoSellRunning = true
+                b.BackgroundTransparency = 0
+                task.spawn(function()
+                    while AutoSellRunning do
+                        -- Tunggu waktu habis dulu baru sell (300 detik)
+                        for i = 300, 1, -1 do
+                            if not AutoSellRunning then break end
+                            b.Text = "SELL: "..i.."s"
+                            task.wait(1)
+                        end
+                        
+                        if AutoSellRunning then
+                            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/%jE>HsnKB9CE"):InvokeServer()
+                        end
+                    end
+                end)
+            end
+        end)
+    else
+        b.MouseButton1Click:Connect(function() game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = cf end)
+    end
 end
 
 createTp("STORE", 10, CFrame.new(993.4823, 9.96749592, 2710.92407))
