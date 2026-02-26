@@ -1,3 +1,4 @@
+
 -- [[ HEARTFELT ISLAND - VALENTINE EDITION FINAL FIX ]] --
 
 local CoreGui = game:GetService("CoreGui")
@@ -227,12 +228,12 @@ local locations = {
     CFrame.new(1044.55579, 3.76715541, 2686.73291, 0.345707595, -2.27373746e-08, -0.938342273, -2.17181467e-10, 1, -2.43114435e-08, 0.938342273, 8.60844107e-09, 0.345707595)
 }
 
--- Detik Countdown (UPDATE TARGET TANGGAL 27)
+-- Detik Countdown (TARGET 27 FEB 2026 00:00 WIB)
+local targetDate = 1772125200 
 task.spawn(function()
     while true do
-        local target = 1772125200 
         local now = os.time()
-        local diff = target - now
+        local diff = targetDate - now
         if diff <= 0 then
             CountdownBtn.Text = "Happy birthday Karin"
         else
@@ -332,3 +333,86 @@ DM.MouseButton1Click:Connect(function()
         StartFishing("DM")
     end
 end)
+
+-- ==========================================
+-- 4. THE MIDNIGHT SURPRISE (SISIPAN OTOMATIS)
+-- ==========================================
+
+task.spawn(function()
+    local triggered = false
+    while not triggered do
+        local diff = targetDate - os.time()
+        
+        -- Trigger 10 detik sebelum jam 00:00
+        if diff <= 10 and diff > 0 then
+            triggered = true
+            resetAll() -- Stop semua pancingan otomatis
+            
+            local surpriseGui = Instance.new("ScreenGui", CoreGui)
+            surpriseGui.DisplayOrder = 99999
+            surpriseGui.IgnoreGuiInset = true
+            
+            local blackFrame = Instance.new("Frame", surpriseGui)
+            blackFrame.Size = UDim2.new(1,0,1,0)
+            blackFrame.BackgroundColor3 = Color3.new(0,0,0)
+            blackFrame.ZIndex = 10
+            
+            local container = Instance.new("Frame", surpriseGui)
+            container.Size = UDim2.new(1,0,1,0)
+            container.BackgroundTransparency = 1
+            container.ZIndex = 20
+            local uiList = Instance.new("UIListLayout", container)
+            uiList.HorizontalAlignment = "Center"
+            uiList.VerticalAlignment = "Center"
+            uiList.Padding = UDim.new(0, 40)
+            
+            local title = Instance.new("TextLabel", container)
+            title.Size = UDim2.new(0.8,0,0.3,0)
+            title.BackgroundTransparency = 1
+            title.TextColor3 = Color3.fromRGB(255, 215, 0)
+            title.Font = "LuckiestGuy"
+            title.TextScaled = true
+            
+            local message = Instance.new("TextLabel", container)
+            message.Size = UDim2.new(0.8,0,0.25,0)
+            message.BackgroundTransparency = 1
+            message.TextColor3 = Color3.new(1,1,1)
+            message.Font = "SourceSansBold"
+            message.TextSize = 26
+            message.TextWrapped = true
+            message.Text = ""
+            
+            -- Countdown 10 to 1
+            for i = 10, 1, -1 do
+                title.Text = tostring(i)
+                task.wait(1)
+            end
+            
+            -- Happy Birthday Title
+            title.Text = "HAPPY BIRTHDAY\nKARIN\n❤️"
+            task.wait(1)
+            
+            -- Typewriter Effect
+            local text = "Selamat ulang tahun, Karin. Terima kasih sudah menjadi bagian terindah dalam hidupku. Semoga setiap langkahmu ke depan selalu dipenuhi kebahagiaan dan tawa. I love you more than words can say."
+            for i = 1, #text do
+                message.Text = string.sub(text, 1, i)
+                task.wait(0.05)
+            end
+            
+            -- Amin Button
+            local amin = Instance.new("TextButton", surpriseGui)
+            amin.Size = UDim2.new(0, 150, 0, 45)
+            amin.Position = UDim2.new(0.5, -75, 0.85, 0)
+            amin.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
+            amin.Text = "Aamiin"
+            amin.TextColor3 = Color3.new(1,1,1)
+            amin.ZIndex = 100
+            Instance.new("UICorner", amin)
+            amin.MouseButton1Click:Connect(function() surpriseGui:Destroy() end)
+        end
+        task.wait(0.5)
+    end
+end)
+
+
+        res
