@@ -6,11 +6,22 @@ local ManualRunning = false
 local CustomRunning = false
 local AutoSellRunning = false
 
--- Net Objects
-local Net = game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net")
+-- Net Objects Path
+local NetPath = game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net")
 
+-- REMOTE SERVER TARGETS
+local SellRemoteID    = "f893fc0849f1c426e30d930fd25d55d51ad5f4a764cd0ab4fb30e48cba5a7588"
+local OpenWeatherID   = "eafd8b603c5b537ebe8af73abb46f58f2df5e43577ecfa428f690f685c1161cc"
+local BuyWeatherID    = "b0febd1d025c853bf2285897ebf93b411b1c8cb26513a2bf918dbefa2ec58894"
+
+-- NEW FISHING REMOTES (UPDATE)
+local FishStartID     = "f6064d19476415377eeb8539f7a20ca4d706901720fda6240c952b5a86c99d4f"
+local FishCastID      = "b47871ff05d63a1d5a2e4a93861427df7360fdf7bd581404fbf8ce74685734dc"
+local FishCatchID     = "e28d0cce33ead4ec77e1dd7b7b626e1e444eb87d8e45ce8add22533e74e5ce81"
+
+-- Helper
 local function getRemote(name)
-    return Net:FindFirstChild(name)
+    return NetPath:FindFirstChild("RF/" .. name)
 end
 
 -- ==========================================
@@ -207,7 +218,27 @@ styleBtn(CUSTOM, 14)
 -- 3. ENGINES
 -- ==========================================
 
--- AUTO SELL ENGINE (TERPISAH)
+-- AUTO WEATHER ENGINE
+task.spawn(function()
+    while true do
+        task.wait(10)
+        local RF_Open = getRemote(OpenWeatherID)
+        local RF_Buy  = getRemote(BuyWeatherID)
+        if RF_Open and RF_Buy then
+            pcall(function()
+                RF_Open:InvokeServer()
+                RF_Buy:InvokeServer("Cloudy")
+                task.wait(2)
+                RF_Buy:InvokeServer("Wind")
+                task.wait(2)
+                RF_Buy:InvokeServer("Storm")
+            end)
+        end
+        task.wait(60)
+    end
+end)
+
+-- AUTO SELL ENGINE
 local function StartAutoSell()
     task.spawn(function()
         while AutoSellRunning do
@@ -217,40 +248,40 @@ local function StartAutoSell()
                 SellTimer.Text = i .. "s"
                 task.wait(1)
             end
-            
             if AutoSellRunning then
-                pcall(function()
-                    local RF_Sell = getRemote("RF/33a873d185063bef26ba059f99ef591295c47caddfbb92baa1effb48474b4178")
-                    if RF_Sell then
-                        RF_Sell:InvokeServer()
-                    end
-                end)
+                local RF_Sell = getRemote(SellRemoteID)
+                if RF_Sell then pcall(function() RF_Sell:InvokeServer() end) end
             end
         end
         SellTimer.Text = "0s"
     end)
 end
 
--- FISHING ENGINE
+-- FISHING ENGINE (UPDATED ELE & DM)
 local function StartFishing(mode)
     task.spawn(function()
         while (mode == "ELE" and IsRunning) or (mode == "DM" and ManualRunning) or (mode == "CUSTOM" and CustomRunning) do
             pcall(function()
-                local RF1 = getRemote("RF/dfff554b315d1d69035710eeadfebb025e12c4bca809dac93041c148825787a5")
+                -- Step 1: Start Fishing
+                local RF1 = getRemote(FishStartID)
                 if RF1 then RF1:InvokeServer() end
                 task.wait(0.15) 
 
-                local RF2 = getRemote("RF/46d334909830fcae9b53eb58f4132d2abcf9209d06f036aa545f3fc1b0f347fb")
+                -- Step 2: Cast Rod (Argumen koordinat terbaru)
+                local RF2 = getRemote(FishCastID)
                 if RF2 then
-                    RF2:InvokeServer(-911.1024780273438, 0.2436489197972943, tick())
+                    RF2:InvokeServer(-1.233184814453125, 0.9193826941424107, tick())
                 end
                 
                 local jeda = (mode == "ELE" and math.random(7,9)/10) or (mode == "DM" and math.random(3,6)/10) or tonumber(CustomInput.Text) or 0.5
                 task.wait(jeda) 
 
-                local RF3 = getRemote("RF/51d7329ca334faba70a594d6c3c7cd523ed3d86988caee760be73ecf2adddc5d")
+                -- Step 3: Catch Fish (Triple Invoke)
+                local RF3 = getRemote(FishCatchID)
                 if RF3 then
-                    RF3:InvokeServer() RF3:InvokeServer() RF3:InvokeServer()
+                    RF3:InvokeServer() 
+                    RF3:InvokeServer() 
+                    RF3:InvokeServer()
                 end
             end)
             task.wait() 
