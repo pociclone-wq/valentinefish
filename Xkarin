@@ -1,13 +1,23 @@
--- [[ HEARTFELT ISLAND - TELEPORT ONLY (FIXED WITH MINIMIZE) ]] --
+-- [[ HEARTFELT ISLAND - VALENTINE EDITION FINAL FIX ]] --
 
 local CoreGui = game:GetService("CoreGui")
-local TweenService = game:GetService("TweenService")
+local IsRunning = false 
+local ManualRunning = false
+local CustomRunning = false
+local AutoSellRunning = false
+
+-- Net Objects
+local Net = game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net")
+
+local function getRemote(name)
+    return Net:FindFirstChild(name)
+end
 
 -- ==========================================
 -- 1. SETUP UI
 -- ==========================================
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "HeartfeltTeleportUI"
+ScreenGui.Name = "HeartfeltValentineUI"
 ScreenGui.Parent = CoreGui
 ScreenGui.ResetOnSpawn = false
 
@@ -16,15 +26,15 @@ local IconButton = Instance.new("TextButton")
 IconButton.Name = "HeartfeltIcon"
 IconButton.Parent = ScreenGui
 IconButton.BackgroundColor3 = Color3.fromRGB(255, 105, 180) 
-IconButton.Position = UDim2.new(0, 15, 0.5, -18)
-IconButton.Size = UDim2.new(0, 36, 0, 36)
+IconButton.Position = UDim2.new(0, 15, 0.5, -22)
+IconButton.Size = UDim2.new(0, 45, 0, 45)
 IconButton.Text = "♡"
 IconButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-IconButton.TextSize = 24
+IconButton.TextSize = 30
 IconButton.Active = true
 IconButton.Draggable = true
 local IconCorner = Instance.new("UICorner", IconButton)
-IconCorner.CornerRadius = UDim.new(0, 8)
+IconCorner.CornerRadius = UDim.new(0, 10)
 
 -- MENU UTAMA
 local MainFrame = Instance.new("Frame")
@@ -32,101 +42,259 @@ MainFrame.Name = "HeartfeltMain"
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(255, 245, 248) 
 MainFrame.BackgroundTransparency = 0.2 
-MainFrame.Position = UDim2.new(0.5, -96, 0.5, -60)
-MainFrame.Size = UDim2.new(0, 192, 0, 120)
+MainFrame.Position = UDim2.new(0.5, -110, 0.5, -75)
+MainFrame.Size = UDim2.new(0, 220, 0, 250) 
 MainFrame.Visible = false 
 MainFrame.Active = true
 MainFrame.Draggable = true
 local MainCorner = Instance.new("UICorner", MainFrame)
-MainCorner.CornerRadius = UDim.new(0, 10)
+MainCorner.CornerRadius = UDim.new(0, 12)
 
 -- Header
 local Header = Instance.new("Frame", MainFrame)
-Header.Size = UDim2.new(1, 0, 0, 28)
+Header.Size = UDim2.new(1, 0, 0, 35)
 Header.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
 local HeaderCorner = Instance.new("UICorner", Header)
-HeaderCorner.CornerRadius = UDim.new(0, 10)
+HeaderCorner.CornerRadius = UDim.new(0, 12)
 
 local Title = Instance.new("TextLabel", Header)
-Title.Size = UDim2.new(0.5, 0, 1, 0)
+Title.Size = UDim2.new(0.6, 0, 1, 0)
 Title.Position = UDim2.new(0.05, 0, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "Teleport ♡" 
+Title.Text = "Heartfelt Island ♡" 
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 12
+Title.TextSize = 15
 Title.Font = Enum.Font.GothamBold
 Title.TextXAlignment = Enum.TextXAlignment.Left
 
--- TOMBOL MINIMIZE (-)
+-- Navigasi
 local HideBtn = Instance.new("TextButton", Header)
-HideBtn.Position = UDim2.new(0.72, 0, 0.15, 0) 
-HideBtn.Size = UDim2.new(0, 20, 0, 20) 
+HideBtn.Position = UDim2.new(0.70, 0, 0.15, 0) 
+HideBtn.Size = UDim2.new(0, 25, 0, 25) 
 HideBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 HideBtn.BackgroundTransparency = 0.4
 HideBtn.Text = "-"
 HideBtn.TextColor3 = Color3.fromRGB(255, 105, 180)
-HideBtn.TextSize = 14
+HideBtn.TextSize = 18
 HideBtn.Font = Enum.Font.GothamBold
-Instance.new("UICorner", HideBtn).CornerRadius = UDim.new(0, 5)
+Instance.new("UICorner", HideBtn).CornerRadius = UDim.new(0, 6)
 
--- TOMBOL CLOSE (X)
 local CloseBtn = Instance.new("TextButton", Header)
-CloseBtn.Position = UDim2.new(0.86, 0, 0.15, 0) 
-CloseBtn.Size = UDim2.new(0, 20, 0, 20) 
+CloseBtn.Position = UDim2.new(0.84, 0, 0.15, 0) 
+CloseBtn.Size = UDim2.new(0, 25, 0, 25) 
 CloseBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 CloseBtn.BackgroundTransparency = 0.4
 CloseBtn.Text = "X"
 CloseBtn.TextColor3 = Color3.fromRGB(255, 105, 180)
-CloseBtn.TextSize = 12
+CloseBtn.TextSize = 16
 CloseBtn.Font = Enum.Font.GothamBold
-Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(0, 5)
+Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(0, 6)
 
--- LOGIKA TOMBOL
+-- Deklarasi Variabel UI
+local ELE, DM, CUSTOM, AUTO_SELL, SellInput, SellTimer
+
+local function resetFishing()
+    IsRunning = false
+    ManualRunning = false
+    CustomRunning = false
+    if ELE then ELE.BackgroundTransparency = 0.4 end
+    if DM then DM.BackgroundTransparency = 0.4 end
+    if CUSTOM then CUSTOM.BackgroundTransparency = 0.4 end
+end
+
 IconButton.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
 HideBtn.MouseButton1Click:Connect(function() MainFrame.Visible = false end)
-CloseBtn.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
+CloseBtn.MouseButton1Click:Connect(function() 
+    resetFishing() 
+    AutoSellRunning = false 
+    ScreenGui:Destroy() 
+end)
+
+local function styleBtn(b, fSize)
+    b.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
+    b.BackgroundTransparency = 0.4
+    b.TextColor3 = Color3.new(1,1,1)
+    b.TextSize = fSize
+    b.Font = Enum.Font.GothamBold
+    Instance.new("UICorner", b).CornerRadius = UDim.new(0, 6)
+end
+
+-- BARIS 1: TELEPORT
+local function createSafeTp(txt, xPos, cf)
+    local b = Instance.new("TextButton", MainFrame)
+    b.Size = UDim2.new(0.28, -2, 0, 25)
+    b.Position = UDim2.new(0.08 + xPos, 0, 0, 45)
+    b.Text = txt
+    styleBtn(b, 8)
+    b.MouseButton1Click:Connect(function()
+        local hrp = game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
+        hrp.CFrame = cf
+        task.wait(0.5)
+        hrp.CFrame = cf
+    end)
+end
+
+createSafeTp("ISLE", 0, CFrame.new(-3561.81006, -279.07428, -1605.98145, 0.772150338, -7.83552707e-08, 0.635439873, 1.16246618e-07, 1, -1.79475581e-08, -0.635439873, 8.77259509e-08, 0.772150338))
+createSafeTp("CRYSTAL", 0.29, CFrame.new(5752.95752, -907.1073, 15339.9775, -0.766604066, -6.68428655e-08, 0.642120063, -6.06007902e-08, 1, 3.17480371e-08, -0.642120063, -1.45748107e-08, -0.766604066))
+createSafeTp("RUIN", 0.58, CFrame.new(6100.86377, -585.924805, 4664.63623, 0.0916252062, -1.5051187e-08, 0.995793581, 5.63343221e-08, 1, 9.93131799e-09, -0.995793581, 5.5187396e-08, 0.0916252062))
+
+-- BARIS 2: AUTO SELL
+SellTimer = Instance.new("TextLabel", MainFrame)
+SellTimer.Size = UDim2.new(0.2, 0, 0, 25)
+SellTimer.Position = UDim2.new(0.05, 0, 0, 75)
+SellTimer.BackgroundTransparency = 1
+SellTimer.Text = "0s"
+SellTimer.TextColor3 = Color3.fromRGB(255, 105, 180)
+SellTimer.TextSize = 12
+SellTimer.Font = Enum.Font.GothamBold
+
+SellInput = Instance.new("TextBox", MainFrame)
+SellInput.Size = UDim2.new(0.2, 0, 0, 25)
+SellInput.Position = UDim2.new(0.25, 0, 0, 75)
+SellInput.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
+SellInput.BackgroundTransparency = 0.7
+SellInput.Text = "5"
+SellInput.TextColor3 = Color3.new(1,1,1)
+SellInput.Font = Enum.Font.GothamBold
+Instance.new("UICorner", SellInput)
+
+AUTO_SELL = Instance.new("TextButton", MainFrame)
+AUTO_SELL.Size = UDim2.new(0.45, 0, 0, 25)
+AUTO_SELL.Position = UDim2.new(0.5, 0, 0, 75)
+AUTO_SELL.Text = "AUTO SELL"
+styleBtn(AUTO_SELL, 10)
+
+-- BARIS 3: ELE & DM
+ELE = Instance.new("TextButton", MainFrame)
+ELE.Size = UDim2.new(0.4, -5, 0, 30)
+ELE.Position = UDim2.new(0.1, 0, 0, 105)
+ELE.Text = "ELE"
+styleBtn(ELE, 14)
+
+DM = Instance.new("TextButton", MainFrame)
+DM.Size = UDim2.new(0.4, -5, 0, 30)
+DM.Position = UDim2.new(0.5, 5, 0, 105)
+DM.Text = "DM"
+styleBtn(DM, 14)
+
+-- BARIS 4: CUSTOM DELAY
+local InfoLabel = Instance.new("TextLabel", MainFrame)
+InfoLabel.Size = UDim2.new(0.8, 0, 0, 20)
+InfoLabel.Position = UDim2.new(0.1, 0, 0, 140)
+InfoLabel.BackgroundTransparency = 1
+InfoLabel.Text = "Set Custom Delay (Seconds):"
+InfoLabel.TextColor3 = Color3.fromRGB(255, 105, 180)
+InfoLabel.TextSize = 10
+InfoLabel.Font = Enum.Font.GothamBold
+
+local CustomInput = Instance.new("TextBox", MainFrame)
+CustomInput.Size = UDim2.new(0.4, 0, 0, 25)
+CustomInput.Position = UDim2.new(0.3, 0, 0, 160)
+CustomInput.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
+CustomInput.BackgroundTransparency = 0.7
+CustomInput.Text = "0.5"
+CustomInput.TextColor3 = Color3.new(1,1,1)
+CustomInput.Font = Enum.Font.GothamBold
+Instance.new("UICorner", CustomInput)
+
+CUSTOM = Instance.new("TextButton", MainFrame)
+CUSTOM.Size = UDim2.new(0.8, 0, 0, 30)
+CUSTOM.Position = UDim2.new(0.1, 0, 0, 195)
+CUSTOM.Text = "START CUSTOM"
+styleBtn(CUSTOM, 14)
 
 -- ==========================================
--- 2. TELEPORT ENGINE (DATA UTUH)
+-- 3. ENGINES
 -- ==========================================
-local function createTp(txt, x, y, cf)
-    local b = Instance.new("TextButton", MainFrame)
-    b.Size = UDim2.new(0, 56, 0, 22)
-    b.Position = UDim2.new(0, x, 0, y)
-    b.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
-    b.BackgroundTransparency = 0.3 
-    b.Text = txt
-    b.TextSize = 7
-    b.TextColor3 = Color3.new(1,1,1)
-    b.Font = Enum.Font.GothamBold
-    b.AutoButtonColor = false
-    Instance.new("UICorner", b).CornerRadius = UDim.new(0, 5)
-    
-    b.MouseButton1Down:Connect(function()
-        TweenService:Create(b, TweenInfo.new(0.1), {Size = UDim2.new(0, 52, 0, 19), BackgroundTransparency = 0}):Play()
+
+-- AUTO SELL ENGINE (TERPISAH)
+local function StartAutoSell()
+    task.spawn(function()
+        while AutoSellRunning do
+            local delayTime = tonumber(SellInput.Text) or 5
+            for i = delayTime, 1, -1 do
+                if not AutoSellRunning then break end
+                SellTimer.Text = i .. "s"
+                task.wait(1)
+            end
+            
+            if AutoSellRunning then
+                pcall(function()
+                    local RF_Sell = getRemote("RF/33a873d185063bef26ba059f99ef591295c47caddfbb92baa1effb48474b4178")
+                    if RF_Sell then
+                        RF_Sell:InvokeServer()
+                    end
+                end)
+            end
+        end
+        SellTimer.Text = "0s"
     end)
-    b.MouseButton1Up:Connect(function()
-        TweenService:Create(b, TweenInfo.new(0.1), {Size = UDim2.new(0, 56, 0, 22), BackgroundTransparency = 0.3}):Play()
-    end)
-    
-    b.MouseButton1Click:Connect(function() 
-        if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = cf
+end
+
+-- FISHING ENGINE
+local function StartFishing(mode)
+    task.spawn(function()
+        while (mode == "ELE" and IsRunning) or (mode == "DM" and ManualRunning) or (mode == "CUSTOM" and CustomRunning) do
+            pcall(function()
+                local RF1 = getRemote("RF/dfff554b315d1d69035710eeadfebb025e12c4bca809dac93041c148825787a5")
+                if RF1 then RF1:InvokeServer() end
+                task.wait(0.15) 
+
+                local RF2 = getRemote("RF/46d334909830fcae9b53eb58f4132d2abcf9209d06f036aa545f3fc1b0f347fb")
+                if RF2 then
+                    RF2:InvokeServer(-911.1024780273438, 0.2436489197972943, tick())
+                end
+                
+                local jeda = (mode == "ELE" and math.random(7,9)/10) or (mode == "DM" and math.random(3,6)/10) or tonumber(CustomInput.Text) or 0.5
+                task.wait(jeda) 
+
+                local RF3 = getRemote("RF/51d7329ca334faba70a594d6c3c7cd523ed3d86988caee760be73ecf2adddc5d")
+                if RF3 then
+                    RF3:InvokeServer() RF3:InvokeServer() RF3:InvokeServer()
+                end
+            end)
+            task.wait() 
         end
     end)
 end
 
--- Baris 1
-createTp("LAVA BASIN", 8, 36, CFrame.new(935.470825, 67.8147202, -10218.5146, -0.852830648, 2.61256954e-08, 0.52218765, 1.55124162e-08, 1, -2.4696547e-08, -0.52218765, -1.29615803e-08, -0.852830648))
-createTp("CORAL", 68, 36, CFrame.new(-3027.68628, 2.5180757, 2258.82959, 0.819023728, -9.81774839e-09, 0.573759675, 9.98786298e-09, 1, 2.85389801e-09, -0.573759675, 3.39322259e-09, 0.819023728))
-createTp("JUNGLE", 128, 36, CFrame.new(1520.59399, 7.62549877, -416.87674, 0.908765912, 1.05187247e-07, 0.417306274, -1.00399568e-07, 1, -3.34227934e-08, -0.417306274, -1.15238743e-08, 0.908765912))
+-- ==========================================
+-- 4. BUTTON EVENTS
+-- ==========================================
+AUTO_SELL.MouseButton1Click:Connect(function()
+    if AutoSellRunning then
+        AutoSellRunning = false
+        AUTO_SELL.BackgroundTransparency = 0.4
+    else
+        AutoSellRunning = true
+        AUTO_SELL.BackgroundTransparency = 0
+        StartAutoSell()
+    end
+end)
 
--- Baris 2
-createTp("KUIL", 8, 64, CFrame.new(1460.87671, -22.1250057, -688.393555, -0.552072883, 7.32866035e-09, 0.833795846, 1.30295863e-08, 1, -1.62364525e-10, -0.833795846, 1.07743778e-08, -0.552072883))
-createTp("KOHANA", 68, 64, CFrame.new(-840.919678, 18.7444096, 451.716675, 0.849281669, 2.00133492e-08, -0.527940035, -1.72365002e-08, 1, 1.01805231e-08, 0.527940035, 4.53706878e-10, 0.849281669))
-createTp("TROPICAL", 128, 64, CFrame.new(-2168.62085, 53.4867668, 3621.67261, -0.693210542, 1.04039266e-08, -0.720735133, 3.19608162e-09, 1, 1.13611351e-08, 0.720735133, 5.57213031e-09, -0.693210542))
+ELE.MouseButton1Click:Connect(function()
+    if IsRunning then resetFishing() else
+        resetFishing() 
+        IsRunning = true 
+        ELE.BackgroundTransparency = 0 
+        StartFishing("ELE")
+    end
+end)
 
--- Baris 3
-createTp("CRYSTAL", 8, 92, CFrame.new(5752.95752, -907.1073, 15339.9775, -0.766604066, -6.68428655e-08, 0.642120063, -6.06007902e-08, 1, 3.17480371e-08, -0.642120063, -1.45748107e-08, -0.766604066))
-createTp("TREASURE", 68, 92, CFrame.new(-3561.81006, -279.07428, -1605.98145, 0.772150338, -7.83552707e-08, 0.635439873, 1.16246618e-07, 1, -1.79475581e-08, -0.635439873, 8.77259509e-08, 0.772150338))
-createTp("RUIN", 128, 92, CFrame.new(6100.86377, -585.924805, 4664.63623, 0.0916252062, -1.5051187e-08, 0.995793581, 5.63343221e-08, 1, 9.93131799e-09, -0.995793581, 5.5187396e-08, 0.0916252062))
+DM.MouseButton1Click:Connect(function()
+    if ManualRunning then resetFishing() else
+        resetFishing() 
+        ManualRunning = true 
+        DM.BackgroundTransparency = 0 
+        StartFishing("DM")
+    end
+end)
+
+CUSTOM.MouseButton1Click:Connect(function()
+    if CustomRunning then resetFishing() else
+        resetFishing() 
+        CustomRunning = true 
+        CUSTOM.BackgroundTransparency = 0 
+        StartFishing("CUSTOM")
+    end
+end)
