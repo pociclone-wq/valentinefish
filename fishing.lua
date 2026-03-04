@@ -7,17 +7,18 @@ local ManualRunning = false
 local CustomRunning = false
 
 local NetPath = game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net")
-local RF_Folder = NetPath:WaitForChild("RF")
+local FishStartID = "f6064d19476415377eeb8539f7a20ca4d706901720fda6240c952b5a86c99d4f"
+local FishCastID  = "b47871ff05d63a1d5a2e4a93861427df7360fdf7bd581404fbf8ce74685734dc"
+local FishCatchID = "e28d0cce33ead4ec77e1dd7b7b626e1e444eb87d8e45ce8add22533e74e5ce81"
 
--- Fungsi deteksi Net Otomatis (Hanya ini yang saya tambahkan/ubah)
-local function getRemote(id)
-    local rf = RF_Folder:FindFirstChild(id)
+local function getRemote(name)
+    local rf = NetPath:FindFirstChild("RF/" .. name)
     if not rf then
-        -- Jika ID beda server, ambil berdasarkan urutan asli fishing (Start=1, Cast=2, Catch=3)
-        local all = RF_Folder:GetChildren()
-        if id == "f6064d19476415377eeb8539f7a20ca4d706901720fda6240c952b5a86c99d4f" then return all[1] end
-        if id == "b47871ff05d63a1d5a2e4a93861427df7360fdf7bd581404fbf8ce74685734dc" then return all[2] end
-        if id == "e28d0cce33ead4ec77e1dd7b7b626e1e444eb87d8e45ce8add22533e74e5ce81" then return all[3] end
+        local allRF = NetPath:WaitForChild("RF"):GetChildren()
+        if name == FishStartID then return allRF[1]
+        elseif name == FishCastID then return allRF[2]
+        elseif name == FishCatchID then return allRF[3]
+        end
     end
     return rf
 end
@@ -74,11 +75,11 @@ local function StartFishing(mode)
     task.spawn(function()
         while (mode == "ELE" and IsRunning) or (mode == "DM" and ManualRunning) or (mode == "CUSTOM" and CustomRunning) do
             pcall(function()
-                local RF1 = getRemote("f6064d19476415377eeb8539f7a20ca4d706901720fda6240c952b5a86c99d4f")
+                local RF1 = getRemote(FishStartID)
                 if RF1 then RF1:InvokeServer() end
                 task.wait(0.15) 
 
-                local RF2 = getRemote("b47871ff05d63a1d5a2e4a93861427df7360fdf7bd581404fbf8ce74685734dc")
+                local RF2 = getRemote(FishCastID)
                 if RF2 then
                     RF2:InvokeServer(-1.233184814453125, 0.9193826941424107, tick())
                 end
@@ -86,7 +87,7 @@ local function StartFishing(mode)
                 local jeda = (mode == "ELE" and math.random(7,9)/10) or (mode == "DM" and math.random(3,6)/10) or tonumber(CustomInput.Text) or 0.5
                 task.wait(jeda) 
 
-                local RF3 = getRemote("e28d0cce33ead4ec77e1dd7b7b626e1e444eb87d8e45ce8add22533e74e5ce81")
+                local RF3 = getRemote(FishCatchID)
                 if RF3 then
                     RF3:InvokeServer() 
                     RF3:InvokeServer() 
