@@ -12,15 +12,7 @@ local FishCastID  = "b47871ff05d63a1d5a2e4a93861427df7360fdf7bd581404fbf8ce74685
 local FishCatchID = "e28d0cce33ead4ec77e1dd7b7b626e1e444eb87d8e45ce8add22533e74e5ce81"
 
 local function getRemote(name)
-    local rf = NetPath:FindFirstChild("RF/" .. name)
-    if not rf then
-        local allRF = NetPath:WaitForChild("RF"):GetChildren()
-        if name == FishStartID then return allRF[1]
-        elseif name == FishCastID then return allRF[2]
-        elseif name == FishCatchID then return allRF[3]
-        end
-    end
-    return rf
+    return NetPath:FindFirstChild("RF/" .. name)
 end
 
 local function resetFishing()
