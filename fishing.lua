@@ -1,31 +1,28 @@
 local Page = ... -- Menerima parent dari script utama
 
--- [[ VARIABLES & COLORS ]] --
+-- [[ VARIABLES ]] --
 local NeonBlue = Color3.fromRGB(0, 255, 255)
 local IsRunning = false
 local ManualRunning = false
 local CustomRunning = false
 
 local NetPath = game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net")
-local RF_Folder = NetPath:WaitForChild("RF")
+local FishStartID = "f6064d19476415377eeb8539f7a20ca4d706901720fda6240c952b5a86c99d4f"
+local FishCastID  = "b47871ff05d63a1d5a2e4a93861427df7360fdf7bd581404fbf8ce74685734dc"
+local FishCatchID = "e28d0cce33ead4ec77e1dd7b7b626e1e444eb87d8e45ce8add22533e74e5ce81"
 
--- Variabel penampung Remote (Otomatis terisi saat Scan)
-local FoundStart, FoundCast, FoundCatch
-
--- [[ REMOTE SCANNER ENGINE ]] --
--- Fungsi ini mencari remote yang benar tanpa menggunakan ID statis
-local function ScanRemotes()
-    local allRF = RF_Folder:GetChildren()
-    -- Logika urutan remote pada game ini biasanya konsisten meski ID berubah
-    for _, rf in pairs(allRF) do
-        if rf:IsA("RemoteFunction") then
-            -- Scan sederhana berdasarkan urutan/pola (Update jika diperlukan)
-            -- Di server baru, kita ambil yang paling sesuai dengan struktur Fishing
-            if not FoundStart then FoundStart = rf 
-            elseif not FoundCast then FoundCast = rf
-            elseif not FoundCatch then FoundCatch = rf end
+-- PERBAIKAN FUNGSI (Agar jalan di semua server tanpa rubah ID manual)
+local function getRemote(name)
+    local rf = NetPath:FindFirstChild("RF/" .. name)
+    if not rf then
+        -- Jika ID tidak ketemu (beda server), cari berdasarkan urutan di folder RF
+        local allRF = NetPath:WaitForChild("RF"):GetChildren()
+        if name == FishStartID then return allRF[1]
+        elseif name == FishCastID then return allRF[2]
+        elseif name == FishCatchID then return allRF[3]
         end
     end
+    return rf
 end
 
 local function resetFishing()
@@ -34,7 +31,7 @@ local function resetFishing()
     CustomRunning = false
 end
 
--- [[ UI ELEMENTS (TELEPORT STYLE) ]] --
+-- [[ UI ELEMENTS (FOLLOWING TELEPORT STYLE) ]] --
 local function CreateButton(txt, y, x, sizeX)
     local b = Instance.new("TextButton", Page)
     b.Text = txt
@@ -48,9 +45,11 @@ local function CreateButton(txt, y, x, sizeX)
     return b
 end
 
+-- ELE & DM Buttons
 local ELE = CreateButton("START ELE", 10, 0.05, 0.45)
 local DM = CreateButton("START DM", 10, 0.52, 0.45)
 
+-- Custom Delay Label & Input
 local Lbl = Instance.new("TextLabel", Page)
 Lbl.Text = "Custom Delay (Seconds)"
 Lbl.Position = UDim2.new(0.05, 0, 0, 45)
@@ -75,28 +74,26 @@ local CUSTOM = CreateButton("START CUSTOM DELAY", 75, 0.05, 0.92)
 
 -- [[ FISHING ENGINE ]] --
 local function StartFishing(mode)
-    if not FoundStart or not FoundCast or not FoundCatch then ScanRemotes() end
-    
     task.spawn(function()
         while (mode == "ELE" and IsRunning) or (mode == "DM" and ManualRunning) or (mode == "CUSTOM" and CustomRunning) do
             pcall(function()
-                -- Step 1: Start
-                if FoundStart then FoundStart:InvokeServer() end
+                local RF1 = getRemote(FishStartID)
+                if RF1 then RF1:InvokeServer() end
                 task.wait(0.15) 
 
-                -- Step 2: Cast (Menggunakan koordinat default yang fix)
-                if FoundCast then
-                    FoundCast:InvokeServer(-1.233184814453125, 0.9193826941424107, tick())
+                local RF2 = getRemote(FishCastID)
+                if RF2 then
+                    RF2:InvokeServer(-1.233184814453125, 0.9193826941424107, tick())
                 end
                 
                 local jeda = (mode == "ELE" and math.random(7,9)/10) or (mode == "DM" and math.random(3,6)/10) or tonumber(CustomInput.Text) or 0.5
                 task.wait(jeda) 
 
-                -- Step 3: Catch (Triple Invoke sesuai instruksi)
-                if FoundCatch then
-                    FoundCatch:InvokeServer() 
-                    FoundCatch:InvokeServer() 
-                    FoundCatch:InvokeServer()
+                local RF3 = getRemote(FishCatchID)
+                if RF3 then
+                    RF3:InvokeServer() 
+                    RF3:InvokeServer() 
+                    RF3:InvokeServer()
                 end
             end)
             task.wait() 
@@ -104,7 +101,7 @@ local function StartFishing(mode)
     end)
 end
 
--- [[ BUTTON EVENTS ]] --
+-- [[ EVENTS ]] --
 ELE.MouseButton1Click:Connect(function()
     if IsRunning then 
         resetFishing()
