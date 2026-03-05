@@ -1,24 +1,31 @@
 --[[ 
-    TULISAN DI ATAS KERTAS (FishIt_FinalFix)
-    Menambahkan tombol ELE, DM, CUSTOM ke dalam Main Frame yang sudah ada
+    FISHING.LUA (PENULIS DI ATAS KERTAS UTAMA)
 --]]
 
-local Main = game:GetService("PlayerGui"):WaitForChild("FishIt_FinalFix"):WaitForChild("Frame")
-local NetPath = game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net")
+local Player = game:GetService("Players").LocalPlayer
+local PlayerGui = Player:WaitForChild("PlayerGui")
 
--- State Pancing
+-- 1. TUNGGU KERTASNYA MUNCUL (Sesuai nama di script utama)
+local ScreenGui = PlayerGui:WaitForChild("FishIt_FinalFix", 10)
+if not ScreenGui then return end
+local Main = ScreenGui:WaitForChild("Frame", 10)
+
+-- 2. PERPANJANG KERTAS (Agar muat tombol baru)
+Main.Size = UDim2.new(0, 200, 0, 480) 
+
+-- Konfigurasi
+local NetPath = game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net")
 local FishingActive = false
 local FishingMode = "NONE"
 
--- Remote Helper
 local function getRF(id) return NetPath:FindFirstChild("RF/" .. id) end
 
--- 1. MENAMBAH TULISAN/TOMBOL PADA KERTAS (Ikuti ukuran skrip utama)
+-- 3. TULIS TOMBOL (Ikuti gaya script utama)
 local function AddFishBtn(text, mode)
     local btn = Instance.new("TextButton", Main)
-    btn.Size = UDim2.new(0, 180, 0, 40) -- Ukuran sama dengan MakeToggle di skrip utama
+    btn.Size = UDim2.new(0, 180, 0, 40)
     btn.Text = "START " .. text
-    btn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     
     btn.MouseButton1Click:Connect(function()
@@ -26,7 +33,7 @@ local function AddFishBtn(text, mode)
             FishingActive = false
             FishingMode = "NONE"
             btn.Text = "START " .. text
-            btn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+            btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
         else
             FishingActive = true
             FishingMode = mode
@@ -36,20 +43,20 @@ local function AddFishBtn(text, mode)
     end)
 end
 
--- Input Delay (Tetap di dalam kertas)
+-- Input Delay
 local CustomInput = Instance.new("TextBox", Main)
-CustomInput.Size = UDim2.new(0, 180, 0, 30)
+CustomInput.Size = UDim2.new(0, 180, 0, 35)
 CustomInput.Text = "0.5"
-CustomInput.PlaceholderText = "Delay..."
+CustomInput.PlaceholderText = "Delay (detik)"
 CustomInput.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 CustomInput.TextColor3 = Color3.new(1,1,1)
 
--- Tulis tombolnya
+-- Tulis di kertas
 AddFishBtn("ELE", "ELE")
 AddFishBtn("DM", "DM")
 AddFishBtn("CUSTOM", "CUSTOM")
 
--- 2. LOGIKA JALAN DI BELAKANG KERTAS
+-- 4. LOGIKA PANCING
 task.spawn(function()
     while true do
         if FishingActive then
@@ -68,6 +75,6 @@ task.spawn(function()
                 c:InvokeServer() c:InvokeServer() c:InvokeServer()
             end)
         end
-        task.wait(0.1)
+        task.wait(0.05)
     end
 end)
