@@ -1,56 +1,150 @@
-return {
-    ["Disable Animation"] = function()
-        local Settings = _G.PociXSettings or {}
-        Settings.DisableAnim = not Settings.DisableAnim
-        if Settings.DisableAnim then
-            local char = game.Players.LocalPlayer.Character
-            if char and char:FindFirstChild("Humanoid") then
-                for _, v in pairs(char.Humanoid:GetPlayingAnimationTracks()) do v:Stop() end
-            end
-        end
-    end,
+-- [[ FISHING MODULE - INJECTION MODE ]] --
+local Players = game:GetService("Players")
+local Player = Players.LocalPlayer
+local PlayerGui = Player:WaitForChild("PlayerGui")
+local RunService = game:GetService("RunService")
+
+-- 1. MENCARI FRAME FISHING DI SCRIPT UTAMA ANDA
+local MainGui = PlayerGui:FindFirstChild("PociX_GUI") or game:GetService("CoreGui"):FindFirstChild("PociX_GUI")
+local Page = MainGui and MainGui:FindFirstChild("Fishing", true)
+
+if not Page then return end -- Berhenti jika frame tidak ditemukan
+
+-- 2. SETUP REMOTE & SETTINGS
+local NetPath = game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net")
+local RF_Start = "2688df0b77e6a72960d933fee24d035fcc4e90d71645a6e4a97c22fc0e297d8b"
+local RF_Cast  = "4cd9bdf89e37861669d0e5f221d1c028b76bca210162e02e5b5c2f5952f8f664"
+local RF_Catch = "c809299d1966f1bb7fe1166ced3c2017cadae50d14d1fb1a2d45f6eb79fc7c03"
+
+local Settings = {
+    DisableAnim = false, DisableCaught = false, DisableCutscene = false, DisableNotify = false,
+    FishingActive = false, FishingMode = "ELE", CustomDelay = 0.5
+}
+
+-- 3. CLEANUP & LAYOUT
+for _, v in pairs(Page:GetChildren()) do if not v:IsA("UIListLayout") then v:Destroy() end end
+local Layout = Page:FindFirstChildWhichIsA("UIListLayout") or Instance.new("UIListLayout", Page)
+Layout.Padding = UDim.new(0, 6)
+Page.CanvasSize = UDim2.new(0, 0, 0, 400)
+
+local NeonBlue = Color3.fromRGB(0, 255, 255)
+local CardColor = Color3.fromRGB(25, 27, 31)
+
+-- 4. FUNGSI TOGEL BULAT (SESUAI FOTO)
+local function CreateToggle(text, key)
+    local Frame = Instance.new("Frame", Page)
+    Frame.Size = UDim2.new(1, -10, 0, 35)
+    Frame.BackgroundColor3 = CardColor
+    Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 6)
     
-    ["Disable Fish Caught"] = function()
-        _G.PociXSettings.DisableCaught = not _G.PociXSettings.DisableCaught
-    end,
-
-    ["Disable Cutscene"] = function()
-        _G.PociXSettings.DisableCutscene = not _G.PociXSettings.DisableCutscene
-        if _G.PociXSettings.DisableCutscene then
-            game.Workspace.CurrentCamera.CameraType = Enum.CameraType.Custom
-        end
-    end,
-
-    ["Disable Notification"] = function()
-        _G.PociXSettings.DisableNotify = not _G.PociXSettings.DisableNotify
-    end,
-
-    ["--- FISHING MODES ---"] = function() print("Header Only") end,
-
-    ["Mode: ELE"] = function() _G.FishingMode = "ELE" end,
-    ["Mode: DM"] = function() _G.FishingMode = "DM" end,
-    ["Mode: CUSTOM"] = function() _G.FishingMode = "CUSTOM" end,
-
-    ["START AUTO FISHING"] = function()
-        _G.FishingActive = not _G.FishingActive
-        if _G.FishingActive then
+    local Label = Instance.new("TextLabel", Frame)
+    Label.Text = "  " .. text
+    Label.Size = UDim2.new(1, -50, 1, 0)
+    Label.BackgroundTransparency = 1
+    Label.TextColor3 = Color3.fromRGB(220, 220, 220)
+    Label.Font = Enum.Font.Gotham
+    Label.TextSize = 12
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    
+    local TogBg = Instance.new("TextButton", Frame)
+    TogBg.Size = UDim2.new(0, 32, 0, 18)
+    TogBg.Position = UDim2.new(1, -40, 0.5, -9)
+    TogBg.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    TogBg.Text = ""
+    Instance.new("UICorner", TogBg).CornerRadius = UDim.new(1, 0)
+    
+    local Ball = Instance.new("Frame", TogBg)
+    Ball.Size = UDim2.new(0, 14, 0, 14)
+    Ball.Position = UDim2.new(0, 2, 0.5, -7)
+    Ball.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Instance.new("UICorner", Ball).CornerRadius = UDim.new(1, 0)
+    
+    TogBg.MouseButton1Click:Connect(function()
+        Settings[key] = not Settings[key]
+        TogBg.BackgroundColor3 = Settings[key] and NeonBlue or Color3.fromRGB(50, 50, 50)
+        Ball:TweenPosition(Settings[key] and UDim2.new(1, -16, 0.5, -7) or UDim2.new(0, 2, 0.5, -7), "Out", "Quad", 0.1, true)
+        
+        if key == "FishingActive" and Settings[key] then
             task.spawn(function()
-                local Net = game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net")
-                while _G.FishingActive do
+                while Settings.FishingActive do
                     pcall(function()
-                        Net:WaitForChild("RF/2688df0b77e6a72960d933fee24d035fcc4e90d71645a6e4a97c22fc0e297d8b"):InvokeServer()
+                        NetPath:WaitForChild("RF/"..RF_Start):InvokeServer()
                         task.wait(0.15)
-                        Net:WaitForChild("RF/4cd9bdf89e37861669d0e5f221d1c028b76bca210162e02e5b5c2f5952f8f664"):InvokeServer(-1.2331848, 0.9966384, tick())
+                        NetPath:WaitForChild("RF/"..RF_Cast):InvokeServer(-1.2331848, 0.9966384, tick())
                         
-                        local waitTime = (_G.FishingMode == "ELE" and 0.8) or (_G.FishingMode == "DM" and 0.4) or 0.5
-                        task.wait(waitTime)
+                        local wait = (Settings.FishingMode == "ELE" and math.random(7,9)/10) or (Settings.FishingMode == "DM" and math.random(3,6)/10) or Settings.CustomDelay
+                        task.wait(wait)
                         
-                        local catch = Net:WaitForChild("RF/c809299d1966f1bb7fe1166ced3c2017cadae50d14d1fb1a2d45f6eb79fc7c03")
+                        local catch = NetPath:WaitForChild("RF/"..RF_Catch)
                         catch:InvokeServer() catch:InvokeServer() catch:InvokeServer()
                     end)
                     task.wait()
                 end
             end)
         end
+    end)
+end
+
+-- 5. BUILD UI ORDER (FITUR DISABLE DI ATAS)
+CreateToggle("Disable Animation", "DisableAnim")
+CreateToggle("Disable Fish Caught", "DisableCaught")
+CreateToggle("Disable Cutscene", "DisableCutscene")
+CreateToggle("Disable Notification", "DisableNotify")
+
+-- Input Delay
+local Inp = Instance.new("TextBox", Page)
+Inp.Size = UDim2.new(1, -10, 0, 30)
+Inp.BackgroundColor3 = CardColor
+Inp.PlaceholderText = "Shake Delay (Seconds)"
+Inp.Text = "0.5"
+Inp.TextColor3 = Color3.new(1,1,1)
+Inp.Font = Enum.Font.Gotham
+Instance.new("UICorner", Inp)
+Inp.FocusLost:Connect(function() Settings.CustomDelay = tonumber(Inp.Text) or 0.5 end)
+
+-- Mode Button
+local ModeBtn = Instance.new("TextButton", Page)
+ModeBtn.Size = UDim2.new(1, -10, 0, 35)
+ModeBtn.BackgroundColor3 = NeonBlue
+ModeBtn.Text = "Mode: ELE"
+ModeBtn.Font = Enum.Font.GothamBold
+Instance.new("UICorner", ModeBtn)
+ModeBtn.MouseButton1Click:Connect(function()
+    if Settings.FishingMode == "ELE" then Settings.FishingMode = "DM"
+    elseif Settings.FishingMode == "DM" then Settings.FishingMode = "CUSTOM"
+    else Settings.FishingMode = "ELE" end
+    ModeBtn.Text = "Mode: " .. Settings.FishingMode
+end)
+
+CreateToggle("Auto Fishing", "FishingActive")
+
+-- 6. LOOP UNTUK DISABLE FITUR
+RunService.RenderStepped:Connect(function()
+    if Settings.DisableAnim then
+        local char = Player.Character
+        if char and char:FindFirstChild("Humanoid") then
+            for _, v in pairs(char.Humanoid:GetPlayingAnimationTracks()) do v:Stop() end
+        end
     end
-}
+    if Settings.DisableCutscene then
+        game.Workspace.CurrentCamera.CameraType = Enum.CameraType.Custom
+    end
+    if Settings.DisableCaught or Settings.DisableNotify then
+        for _, gui in pairs(PlayerGui:GetChildren()) do
+            if gui:IsA("ScreenGui") and gui.Name ~= "PociX_GUI" then
+                for _, v in pairs(gui:GetDescendants()) do
+                    if v:IsA("TextLabel") and v.Visible then
+                        local t = v.Text:lower()
+                        if Settings.DisableCaught and (t:find("in") or t:find("lb") or t:find("kg")) then
+                            v.Visible = false
+                            if v.Parent:IsA("Frame") then v.Parent.Visible = false end
+                        elseif Settings.DisableNotify and t:find("you got:") then
+                            v.Visible = false
+                            if v.Parent:IsA("Frame") then v.Parent.Visible = false end
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
