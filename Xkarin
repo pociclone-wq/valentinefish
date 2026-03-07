@@ -1,4 +1,4 @@
--- [[ PociX UI - FINAL REPAIR VERSION (No External Loaders Except Teleport) ]] --
+-- [[ PociX UI - FINAL VERSION (Full Animation & Teleport Integration) ]] --
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 local RunService = game:GetService("RunService")
@@ -147,12 +147,10 @@ local function Tab(name)
     return p
 end
 
--- URUTAN MENU DAN PENAMAAN 
-for _, v in pairs({"Home", "Fishing", "Teleport", "Automation", "Shop", "Webhook", "Setting"}) do Tab(v) end
+-- URUTAN MENU (Sesuai instruksi: Setting diganti Animation)
+for _, v in pairs({"Home", "Fishing", "Teleport", "Automation", "Shop", "Webhook", "Animation"}) do Tab(v) end
 
--- Dihapus: Bagian GITHUB LOADER LOGIC dan pemanggilannya untuk Home, Fishing, Automation, Shop, dan Webhook.
-
--- [[ TELEPORT PAGE CONTENT (UTUH TIDAK DISENTUH) ]] --
+-- [[ TELEPORT PAGE CONTENT ]] --
 local Tele = AllPages["Teleport"]
 local SelectedPlayer = nil
 local SelectedLoc = nil
@@ -223,12 +221,12 @@ LocList.ScrollBarThickness = 2
 Instance.new("UICorner", LocList).CornerRadius = UDim.new(0, 5)
 local UIListLayoutL = Instance.new("UIListLayout", LocList)
 
-local function Btn(txt, y)
-    local b = Instance.new("TextButton", Tele)
+local function CommonBtn(parent, txt, y, color)
+    local b = Instance.new("TextButton", parent)
     b.Text = txt
     b.Position = UDim2.new(0.5, -110, 0, y)
     b.Size = UDim2.new(0, 220, 0, 28)
-    b.BackgroundColor3 = NeonBlue
+    b.BackgroundColor3 = color or NeonBlue
     b.TextColor3 = Color3.new(0,0,0)
     b.Font = Enum.Font.GothamBold
     b.TextSize = 11
@@ -236,8 +234,8 @@ local function Btn(txt, y)
     return b
 end
 
-local TPBtn = Btn("Teleport Now", 115)
-local RefBtn = Btn("Refresh Player List", 150)
+local TPBtn = CommonBtn(Tele, "Teleport Now", 115)
+local RefBtn = CommonBtn(Tele, "Refresh Player List", 150)
 
 local function refreshPlayers()
 	for _, child in pairs(PlayerList:GetChildren()) do if child:IsA("TextButton") then child:Destroy() end end
@@ -312,10 +310,102 @@ RefBtn.MouseButton1Click:Connect(function() refreshPlayers() loadLocations() end
 Players.PlayerAdded:Connect(refreshPlayers)
 Players.PlayerRemoving:Connect(refreshPlayers)
 
--- Toggle Logic
+-- [[ ANIMATION PAGE CONTENT (Persis Struktur Teleport) ]] --
+local AnimPage = AllPages["Animation"]
+local SelectedEmoteData = nil
+local currentTrack = nil
+
+local LblE = Instance.new("TextLabel", AnimPage)
+LblE.Text = "Select Emote"
+LblE.Position = UDim2.new(0, 0, 0, 0)
+LblE.Size = UDim2.new(0.4, 0, 0, 15)
+LblE.TextColor3 = Color3.new(1,1,1)
+LblE.Font = Enum.Font.GothamBold
+LblE.TextSize = 11
+LblE.BackgroundTransparency = 1
+LblE.TextXAlignment = Enum.TextXAlignment.Left
+
+local DropBtnE = Instance.new("TextButton", AnimPage)
+DropBtnE.Text = " Select Emote ▼"
+DropBtnE.Position = UDim2.new(0.45, 0, 0, -5)
+DropBtnE.Size = UDim2.new(0.55, 0, 0, 25)
+DropBtnE.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+DropBtnE.TextColor3 = Color3.fromRGB(180, 180, 180)
+DropBtnE.Font = Enum.Font.Gotham
+DropBtnE.TextSize = 10
+DropBtnE.TextXAlignment = Enum.TextXAlignment.Left
+DropBtnE.ZIndex = 5
+Instance.new("UICorner", DropBtnE).CornerRadius = UDim.new(0, 3)
+
+local EmoteList = Instance.new("ScrollingFrame", AnimPage)
+EmoteList.Size = UDim2.new(0.55, 0, 0, 100)
+EmoteList.Position = UDim2.new(0.45, 0, 0, 22)
+EmoteList.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+EmoteList.Visible = false
+EmoteList.ZIndex = 15
+EmoteList.BorderSizePixel = 0
+EmoteList.ScrollBarThickness = 2
+Instance.new("UICorner", EmoteList).CornerRadius = UDim.new(0, 5)
+local UIListLayoutE = Instance.new("UIListLayout", EmoteList)
+
+local PlayBtn = CommonBtn(AnimPage, "Play Emote Now", 115, NeonBlue)
+local StopBtn = CommonBtn(AnimPage, "Stop Emote", 150, Color3.fromRGB(200, 50, 50))
+
+local function loadAnimations()
+    local success, EmoteData = pcall(function()
+        return loadstring(game:HttpGet("https://raw.githubusercontent.com/pociclone-wq/valentinefish/refs/heads/main/Animation.lua"))()
+    end)
+    if success and EmoteData then
+        for _, child in pairs(EmoteList:GetChildren()) do if child:IsA("TextButton") then child:Destroy() end end
+        for _, data in ipairs(EmoteData) do
+            local b = Instance.new("TextButton", EmoteList)
+            b.Size = UDim2.new(1, 0, 0, 25)
+            b.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+            b.Text = data.Name
+            b.TextColor3 = Color3.new(1,1,1)
+            b.Font = Enum.Font.Gotham
+            b.TextSize = 10
+            b.ZIndex = 16
+            Instance.new("UICorner", b).CornerRadius = UDim.new(0, 4)
+            b.MouseButton1Click:Connect(function()
+                SelectedEmoteData = data
+                EmoteList.Visible = false
+                DropBtnE.Text = " "..data.Name.." ▼"
+            end)
+        end
+        EmoteList.CanvasSize = UDim2.new(0, 0, 0, #EmoteData * 27)
+    end
+end
+
+DropBtnE.MouseButton1Click:Connect(function() EmoteList.Visible = not EmoteList.Visible end)
+
+PlayBtn.MouseButton1Click:Connect(function()
+    if SelectedEmoteData then
+        local char = LocalPlayer.Character
+        local hum = char and char:FindFirstChildOfClass("Humanoid")
+        local animr = hum and hum:FindFirstChildOfClass("Animator")
+        if animr then
+            if currentTrack then currentTrack:Stop() end
+            local animObj = Instance.new("Animation")
+            animObj.AnimationId = SelectedEmoteData.AnimationId
+            currentTrack = animr:LoadAnimation(animObj)
+            currentTrack.Priority = SelectedEmoteData.AnimationPriority
+            currentTrack.Looped = SelectedEmoteData.Looped
+            currentTrack:Play()
+            currentTrack:AdjustSpeed(SelectedEmoteData.PlaybackSpeed)
+        end
+    end
+end)
+
+StopBtn.MouseButton1Click:Connect(function()
+    if currentTrack then currentTrack:Stop() currentTrack = nil end
+end)
+
+-- Toggle & Initialization
 Icon.MouseButton1Click:Connect(function() Main.Visible = not Main.Visible end)
 Hide.MouseButton1Click:Connect(function() Main.Visible = false end)
 Close.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
 
 refreshPlayers()
 loadLocations()
+loadAnimations()
