@@ -1,4 +1,4 @@
--- [[ PociX UI - FINAL VERSION (Full Animation & Teleport Integration) ]] --
+-- [[ PociX UI - FINAL VERSION (Full Animation, Teleport & Webhook Integration) ]] --
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 local RunService = game:GetService("RunService")
@@ -147,7 +147,7 @@ local function Tab(name)
     return p
 end
 
--- URUTAN MENU (Sesuai instruksi: Setting diganti Animation)
+-- URUTAN MENU
 for _, v in pairs({"Home", "Fishing", "Teleport", "Automation", "Shop", "Webhook", "Animation"}) do Tab(v) end
 
 -- [[ TELEPORT PAGE CONTENT ]] --
@@ -310,7 +310,7 @@ RefBtn.MouseButton1Click:Connect(function() refreshPlayers() loadLocations() end
 Players.PlayerAdded:Connect(refreshPlayers)
 Players.PlayerRemoving:Connect(refreshPlayers)
 
--- [[ ANIMATION PAGE CONTENT (Persis Struktur Teleport) ]] --
+-- [[ ANIMATION PAGE CONTENT ]] --
 local AnimPage = AllPages["Animation"]
 local SelectedEmoteData = nil
 local currentTrack = nil
@@ -400,6 +400,122 @@ end)
 StopBtn.MouseButton1Click:Connect(function()
     if currentTrack then currentTrack:Stop() currentTrack = nil end
 end)
+
+
+-- [[ WEBHOOK PAGE CONTENT ]] --
+local WebPage = AllPages["Webhook"]
+local SelectedMinTier = 1
+
+local LblWeb = Instance.new("TextLabel", WebPage)
+LblWeb.Text = "Webhook URL"
+LblWeb.Position = UDim2.new(0, 0, 0, 0)
+LblWeb.Size = UDim2.new(0.4, 0, 0, 15)
+LblWeb.TextColor3 = Color3.new(1,1,1)
+LblWeb.Font = Enum.Font.GothamBold
+LblWeb.TextSize = 11
+LblWeb.BackgroundTransparency = 1
+LblWeb.TextXAlignment = Enum.TextXAlignment.Left
+
+local InputWeb = Instance.new("TextBox", WebPage)
+InputWeb.Position = UDim2.new(0.45, 0, 0, -5)
+InputWeb.Size = UDim2.new(0.55, 0, 0, 25)
+InputWeb.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+InputWeb.TextColor3 = Color3.fromRGB(180, 180, 180)
+InputWeb.Font = Enum.Font.Gotham
+InputWeb.TextSize = 10
+InputWeb.PlaceholderText = " Paste URL Here..."
+InputWeb.TextXAlignment = Enum.TextXAlignment.Left
+InputWeb.ClearTextOnFocus = false
+Instance.new("UICorner", InputWeb).CornerRadius = UDim.new(0, 3)
+
+local LblTier = Instance.new("TextLabel", WebPage)
+LblTier.Text = "Minimum Tier"
+LblTier.Position = UDim2.new(0, 0, 0, 40)
+LblTier.Size = UDim2.new(0.4, 0, 0, 15)
+LblTier.TextColor3 = Color3.new(1,1,1)
+LblTier.Font = Enum.Font.GothamBold
+LblTier.TextSize = 11
+LblTier.BackgroundTransparency = 1
+LblTier.TextXAlignment = Enum.TextXAlignment.Left
+
+local DropBtnW = Instance.new("TextButton", WebPage)
+DropBtnW.Text = " Tier 1 (Common) ▼"
+DropBtnW.Position = UDim2.new(0.45, 0, 0, 35)
+DropBtnW.Size = UDim2.new(0.55, 0, 0, 25)
+DropBtnW.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+DropBtnW.TextColor3 = Color3.fromRGB(180, 180, 180)
+DropBtnW.Font = Enum.Font.Gotham
+DropBtnW.TextSize = 10
+DropBtnW.TextXAlignment = Enum.TextXAlignment.Left
+DropBtnW.ZIndex = 5
+Instance.new("UICorner", DropBtnW).CornerRadius = UDim.new(0, 3)
+
+local WebTierList = Instance.new("ScrollingFrame", WebPage)
+WebTierList.Size = UDim2.new(0.55, 0, 0, 80)
+WebTierList.Position = UDim2.new(0.45, 0, 0, 62)
+WebTierList.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+WebTierList.Visible = false
+WebTierList.ZIndex = 15
+WebTierList.BorderSizePixel = 0
+WebTierList.ScrollBarThickness = 2
+Instance.new("UICorner", WebTierList).CornerRadius = UDim.new(0, 5)
+local UIListLayoutW = Instance.new("UIListLayout", WebTierList)
+
+local TierDataNames = {
+    {1, "Common"}, {2, "Uncommon"}, {3, "Rare"}, {4, "Epic"},
+    {5, "Legendary"}, {6, "Mythic"}, {7, "Secret"}, {8, "Forgotten"}
+}
+
+for _, t in ipairs(TierDataNames) do
+    local b = Instance.new("TextButton", WebTierList)
+    b.Size = UDim2.new(1, 0, 0, 25)
+    b.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    b.Text = " Tier " .. t[1] .. " (" .. t[2] .. ")"
+    b.TextColor3 = Color3.new(1,1,1)
+    b.Font = Enum.Font.Gotham
+    b.TextSize = 10
+    b.ZIndex = 16
+    Instance.new("UICorner", b).CornerRadius = UDim.new(0, 4)
+    b.MouseButton1Click:Connect(function()
+        SelectedMinTier = t[1]
+        WebTierList.Visible = false
+        DropBtnW.Text = b.Text .. " ▼"
+    end)
+end
+WebTierList.CanvasSize = UDim2.new(0, 0, 0, #TierDataNames * 27)
+
+DropBtnW.MouseButton1Click:Connect(function() WebTierList.Visible = not WebTierList.Visible end)
+
+local StartWebBtn = CommonBtn(WebPage, "Start Webhook", 115, Color3.fromRGB(50, 200, 50))
+local WebhookRunning = false
+
+StartWebBtn.MouseButton1Click:Connect(function()
+    if WebhookRunning then
+        WebhookRunning = false
+        StartWebBtn.Text = "Start Webhook"
+        StartWebBtn.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
+        _G.PociX_WebhookActive = false
+    else
+        if InputWeb.Text == "" or not string.match(InputWeb.Text, "http") then
+            StartWebBtn.Text = "Invalid URL!"
+            task.wait(1)
+            StartWebBtn.Text = "Start Webhook"
+            return
+        end
+        WebhookRunning = true
+        StartWebBtn.Text = "Stop Webhook"
+        StartWebBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+        
+        -- Send configuration to Global Environtment
+        _G.PociX_WebhookURL = InputWeb.Text
+        _G.PociX_MinTier = SelectedMinTier
+        _G.PociX_WebhookActive = true
+        
+        -- Execute Webhook Logic Script
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/pociclone-wq/valentinefish/refs/heads/main/Webhook.lua"))()
+    end
+end)
+
 
 -- Toggle & Initialization
 Icon.MouseButton1Click:Connect(function() Main.Visible = not Main.Visible end)
